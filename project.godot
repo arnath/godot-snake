@@ -12,7 +12,7 @@ _global_script_classes=[ {
 "base": "Area2D",
 "class": "Snake",
 "language": "GDScript",
-"path": "res://scenes/Snake.gd"
+"path": "res://scripts/Snake.gd"
 } ]
 _global_script_class_icons={
 "Snake": ""
