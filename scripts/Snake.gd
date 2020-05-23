@@ -1,6 +1,8 @@
 extends SnakePart
 class_name Snake
 
+signal ate_food
+
 export(int) var tile_size_pixels = 16
 export(float) var speed_tiles_per_sec = 15
 export(PackedScene) var Tail
@@ -41,7 +43,6 @@ func _physics_process(delta: float) -> void:
             prev_tail = tail_node
         
     move(delta)
-    return
     
 # Start a new game.
 func start(pos: Vector2) -> void:
@@ -50,7 +51,6 @@ func start(pos: Vector2) -> void:
 
 func _on_Snake_area_entered(area: Area2D) -> void:
     if area.is_in_group("food"):
-        print("collided with food")
         # Create a tail node at the current location of the head and add it to
         # the scene.
         var tail_node: SnakePart = Tail.instance()
@@ -61,4 +61,6 @@ func _on_Snake_area_entered(area: Area2D) -> void:
         # Update the head to replace the location of the food.
         position = area.position
         _target_position = position
-        return
+        
+        # Send signal to create another food.
+        emit_signal("ate_food")

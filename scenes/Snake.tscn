@@ -10,6 +10,7 @@ extents = Vector2( 32, 32 )
 [node name="Snake" type="Area2D"]
 scale = Vector2( 0.25, 0.25 )
 script = ExtResource( 2 )
+speed_tiles_per_sec = 15.0
 Tail = ExtResource( 3 )
 
 [node name="Sprite" type="Sprite" parent="."]
