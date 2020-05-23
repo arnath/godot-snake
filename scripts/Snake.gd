@@ -2,7 +2,7 @@ extends SnakePart
 class_name Snake
 
 export(int) var tile_size_pixels = 16
-export(float) var speed_tiles_per_sec = 5
+export(float) var speed_tiles_per_sec = 15
 export(PackedScene) var Tail
 
 const movementVectors = {
@@ -32,31 +32,33 @@ func _physics_process(delta: float) -> void:
     # If the next cell has been reached, set a new target for each node.
     var prev_tail: Area2D = null
     if position == _target_position and direction != -1:
-        set_target(position + movementVectors[direction] * tile_size_pixels, speed_tiles_per_sec)
+        set_target(position + movementVectors[direction] * tile_size_pixels)
         for tail_node in tail:
             if prev_tail == null:
-                tail_node.set_target(position, speed_tiles_per_sec)
+                tail_node.set_target(position)
             else:
-                tail_node.set_target(prev_tail.position, speed_tiles_per_sec)
+                tail_node.set_target(prev_tail.position)
             prev_tail = tail_node
         
-    ._physics_process(delta)
+    move(delta)
+    return
     
 # Start a new game.
 func start(pos: Vector2) -> void:
-    position = pos
-    _target_position = pos
+    init(pos, pos, speed_tiles_per_sec)
     show()
 
 func _on_Snake_area_entered(area: Area2D) -> void:
     if area.is_in_group("food"):
+        print("collided with food")
         # Create a tail node at the current location of the head and add it to
         # the scene.
-        var tail_node: Area2D = Tail.instance()
-        tail_node.position = position
+        var tail_node: SnakePart = Tail.instance()
+        tail_node.init(_original_position, _target_position, speed_tiles_per_sec)
         tail.push_front(tail_node)
         get_parent().add_child(tail_node)
         
         # Update the head to replace the location of the food.
         position = area.position
         _target_position = position
+        return

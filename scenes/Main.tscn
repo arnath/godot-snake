@@ -14,3 +14,9 @@ position = Vector2( 640, 360 )
 
 [node name="Food" parent="." instance=ExtResource( 3 )]
 position = Vector2( 320, 360 )
+
+[node name="Food2" parent="." instance=ExtResource( 3 )]
+position = Vector2( 80, 160 )
+
+[node name="Food3" parent="." instance=ExtResource( 3 )]
+position = Vector2( 720, 712 )
