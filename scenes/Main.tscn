@@ -12,5 +12,5 @@ Food = ExtResource( 3 )
 position = Vector2( 8, 8 )
 
 [node name="StartPosition" type="Position2D" parent="."]
-position = Vector2( 640, 360 )
+position = Vector2( 632, 360 )
 [connection signal="ate_food" from="Snake" to="." method="_spawn_food"]
