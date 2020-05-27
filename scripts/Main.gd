@@ -15,7 +15,7 @@ func _spawn_food() -> void:
     # with the snake head.
     var food_position: Vector2 = $Snake.position
     while food_position == $Snake.position:
-        food_position = Vector2((randi() % 80) * 16 + 8, (randi() % 45) * 16 + 8)
+        food_position = Vector2((randi() % 38) * 16 + 24, (randi() % 38) * 16 + 24)
         
     # Add the food to the scene.
     var food: Food = Food.instance()

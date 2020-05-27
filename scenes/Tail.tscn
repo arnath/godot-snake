@@ -6,7 +6,9 @@
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 32, 32 )
 
-[node name="Tail" type="Area2D"]
+[node name="Tail" type="Area2D" groups=[
+"tail",
+]]
 scale = Vector2( 0.25, 0.25 )
 script = ExtResource( 2 )
 

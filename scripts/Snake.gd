@@ -48,6 +48,10 @@ func _physics_process(delta: float) -> void:
 func start(pos: Vector2) -> void:
     init(pos, pos, speed_tiles_per_sec)
     show()
+    
+func game_over() -> void:
+    # Set speed to 0 so the snake stops.
+    _speed_tiles_per_sec = 0
 
 func _on_Snake_area_entered(area: Area2D) -> void:
     if area.is_in_group("food"):
@@ -64,3 +68,9 @@ func _on_Snake_area_entered(area: Area2D) -> void:
         
         # Send signal to create another food.
         emit_signal("ate_food")
+    elif area.is_in_group("tail"):
+        if len(tail) != 0 && area != tail[0]:
+            game_over()
+
+func _on_Snake_body_entered(body):
+    game_over()
