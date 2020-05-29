@@ -4,7 +4,7 @@ class_name Snake
 signal ate_food
 
 export(int) var tile_size_pixels = 16
-export(float) var speed_tiles_per_sec = 15
+export(float) var speed_tiles_per_sec = 10
 export(PackedScene) var Tail
 
 const movementVectors = {
@@ -14,27 +14,32 @@ const movementVectors = {
     3: Vector2.DOWN
 }
 
-var direction: int = -1
+# We keep track of current and next direction to avoid being able to move
+# backwards by hitting buttons quickly in between movement ticks.
+var current_direction: int = -1
+var next_direction: int = -1
+
 var tail = []
 
 # Set movement direction based on unhandled input.
 func _unhandled_input(_event: InputEvent) -> void:
-    if Input.is_action_pressed("ui_right") and direction != 1:
-        direction = 0
-    elif Input.is_action_pressed("ui_left") and direction != 0:
-        direction = 1
-    elif Input.is_action_pressed("ui_up") and direction != 3:
-        direction = 2
-    elif Input.is_action_pressed("ui_down") and direction != 2:
-        direction = 3
+    if Input.is_action_pressed("ui_right") and current_direction != 1:
+        next_direction = 0
+    elif Input.is_action_pressed("ui_left") and current_direction != 0:
+        next_direction = 1
+    elif Input.is_action_pressed("ui_up") and current_direction != 3:
+        next_direction = 2
+    elif Input.is_action_pressed("ui_down") and current_direction != 2:
+        next_direction = 3
 
 func _physics_process(delta: float) -> void:
     var weight: float = delta * speed_tiles_per_sec
     
     # If the next cell has been reached, set a new target for each node.
     var prev_tail: Area2D = null
-    if position == _target_position and direction != -1:
-        set_target(position + movementVectors[direction] * tile_size_pixels)
+    if position == _target_position and next_direction != -1:
+        current_direction = next_direction
+        set_target(position + movementVectors[current_direction] * tile_size_pixels)
         for tail_node in tail:
             if prev_tail == null:
                 tail_node.set_target(position)
