@@ -75,9 +75,7 @@ func _on_Snake_area_entered(area: Area2D) -> void:
         emit_signal("ate_food")
     elif area.is_in_group("tail"):
         if len(tail) != 0 && area != tail[0]:
-            print("collided with tail")
             game_over()
 
 func _on_Snake_body_entered(body):
-    print("collided with wall")
     game_over()
