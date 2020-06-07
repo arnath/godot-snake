@@ -17,6 +17,9 @@ func set_target(target: Vector2) -> void:
     _original_position = position
     _target_position = target
     _offset = 0
+    
+func is_at_target() -> bool:
+    return position == _target_position
 
 # Move toward the target.
 func move(delta: float) -> void:
