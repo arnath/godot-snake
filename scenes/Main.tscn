@@ -48,7 +48,7 @@ Food = ExtResource( 3 )
 position = Vector2( 8, 8 )
 
 [node name="StartPosition" type="Position2D" parent="."]
-position = Vector2( 296, 296 )
+position = Vector2( 24, 360 )
 
 [node name="Walls" type="TileMap" parent="." groups=[
 "walls",

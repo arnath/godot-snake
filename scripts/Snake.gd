@@ -51,7 +51,7 @@ func move(delta: float) -> void:
     .move(delta)
     for tail_node in tail:
         tail_node.move(delta)
-        
+
 func _set_new_targets() -> void:
     # Calculate next movement vector.
     current_direction = next_direction
@@ -60,26 +60,25 @@ func _set_new_targets() -> void:
     # Check for a collision on the next move.
     $RayCast2D.cast_to = move * 4
     $RayCast2D.force_raycast_update()
+    
     if $RayCast2D.is_colliding():
-        var collider = $RayCast2D.get_collider()
+        var collider: Node2D = $RayCast2D.get_collider()
         if collider.is_in_group("food"):
             _eat_food(collider.position)
         else:
-            _game_over()
+            # Set speed to 0 so the snake stops.
+            _speed_tiles_per_sec = 0
     
-    # Set a new target for each piece of the snake.
-    set_target(position + move)    
-    var prev_tail: Area2D = null
-    for tail_node in tail:
-        if prev_tail == null:
-            tail_node.set_target(position)
-        else:
-            tail_node.set_target(prev_tail.position)
-        prev_tail = tail_node
-    
-func _game_over() -> void:
-    # Set speed to 0 so the snake stops.
-    _speed_tiles_per_sec = 0
+    # Set a new target for each piece of the snake if it's still moving.
+    if _speed_tiles_per_sec != 0:
+        set_target(position + move)    
+        var prev_tail: Area2D = null
+        for tail_node in tail:
+            if prev_tail == null:
+                tail_node.set_target(position)
+            else:
+                tail_node.set_target(prev_tail.position)
+            prev_tail = tail_node
 
 func _eat_food(food_position: Vector2) -> void:
     # Create a tail node at the current location of the head and add it to
