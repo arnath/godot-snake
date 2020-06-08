@@ -2,9 +2,9 @@ extends SnakePart
 class_name Snake
 
 signal ate_food
+signal game_over
 
 export(int) var tile_size_pixels = 16
-export(float) var speed_tiles_per_sec = 10
 export(PackedScene) var Tail
 
 const movement_vectors = {
@@ -33,7 +33,7 @@ func _unhandled_input(_event: InputEvent) -> void:
         next_direction = 3
 
 func _physics_process(delta: float) -> void:
-    var weight: float = delta * speed_tiles_per_sec
+    var weight: float = delta * _speed_tiles_per_sec
     
     # If the next cell has been reached, set a new target for each node.
     var prev_tail: Area2D = null
@@ -41,11 +41,6 @@ func _physics_process(delta: float) -> void:
         _set_new_targets()
         
     move(delta)
-    
-# Start a new game.
-func start(pos: Vector2) -> void:
-    init(pos, pos, speed_tiles_per_sec)
-    show()
     
 func move(delta: float) -> void:
     .move(delta)
@@ -66,25 +61,23 @@ func _set_new_targets() -> void:
         if collider.is_in_group("food"):
             _eat_food(collider.position)
         else:
-            # Set speed to 0 so the snake stops.
-            _speed_tiles_per_sec = 0
+            _game_over()
     
-    # Set a new target for each piece of the snake if it's still moving.
-    if _speed_tiles_per_sec != 0:
-        set_target(position + move)    
-        var prev_tail: Area2D = null
-        for tail_node in tail:
-            if prev_tail == null:
-                tail_node.set_target(position)
-            else:
-                tail_node.set_target(prev_tail.position)
-            prev_tail = tail_node
+    # Set a new target for each piece of the snake.
+    set_target(position + move)    
+    var prev_tail: Area2D = null
+    for tail_node in tail:
+        if prev_tail == null:
+            tail_node.set_target(position)
+        else:
+            tail_node.set_target(prev_tail.position)
+        prev_tail = tail_node
 
 func _eat_food(food_position: Vector2) -> void:
     # Create a tail node at the current location of the head and add it to
     # the scene.
     var tail_node: SnakePart = Tail.instance()
-    tail_node.init(position, position, speed_tiles_per_sec)
+    tail_node.init(position, position, _speed_tiles_per_sec)
     tail.push_front(tail_node)
     get_parent().add_child(tail_node)
     
@@ -94,3 +87,13 @@ func _eat_food(food_position: Vector2) -> void:
     
     # Send signal to create another food.
     emit_signal("ate_food")
+    
+func _game_over() -> void:
+    # Signal game over.
+    emit_signal("game_over")
+    
+    # Free all tail nodes.
+    for tail_node in tail:
+        tail_node.queue_free()
+        
+    queue_free()
