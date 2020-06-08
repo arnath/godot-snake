@@ -3,12 +3,13 @@ class_name HUD
 
 signal start_game
 
-export(PackedScene) var HighScoreListItem
-
 const HIGH_SCORES_FILE: String = "user://high_scores.dat"
 const MAX_HIGH_SCORES: int = 5
 
-# _high_scores is an object of the form below with a max of 5 scores.
+export(PackedScene) var HighScoreListItem
+
+# Array of top 5 scores with player names, in the form of an object of the
+# form below with a max of 5 scores.
 # {
 #   "scores":
 #   [
@@ -18,16 +19,22 @@ const MAX_HIGH_SCORES: int = 5
 # }
 var _high_scores
 
-var game_over_score: int
+# When the game ends, we get the score from the Main scene but don't have
+# the player name for a potential high score until the high score input UI
+# has been shown. To deal with this, we store the score at game over
+# temporarily.
+var _game_over_score: int
 
 func _ready() -> void:
     $MarginContainer/DefaultInterface/HighScoreList/PlayerScoreListItem.init("Player", "Score")
     $MarginContainer/DefaultInterface/HighScoreList/DashListItem.init("----------", "----------")
     _show_default_ui()
     
+# Handle game over by checking if there was a new high score and showing
+# either the high score input UI or the main start game screen.
 func game_over(score: int) -> void:
     var new_high_score: bool = false
-    if len(_high_scores) < MAX_HIGH_SCORES:
+    if score > 0 and len(_high_scores) < MAX_HIGH_SCORES:
         new_high_score = true
     else:
         for player_score in _high_scores:
@@ -36,11 +43,12 @@ func game_over(score: int) -> void:
                 break
     
     if new_high_score:
-        game_over_score = score
+        _game_over_score = score
         _show_high_score_input()
     else:
         _show_default_ui()
 
+# Shows the main start game screen with hgih scores.
 func _show_default_ui() -> void:
     _load_high_scores()
 
@@ -58,11 +66,13 @@ func _show_default_ui() -> void:
         
     $MarginContainer/HighScoreInput.hide()
     $MarginContainer/DefaultInterface.show()
-    
+
+# Shows the high score input UI.
 func _show_high_score_input() -> void:
     $MarginContainer/DefaultInterface.hide()
     $MarginContainer/HighScoreInput.show()
-        
+
+# Loads the high scores from a file.        
 func _load_high_scores() -> void:
     # Load high scores from file.
     var file: File = File.new()
@@ -70,7 +80,8 @@ func _load_high_scores() -> void:
     _high_scores = file.get_var()
     if _high_scores == null:
         _high_scores = [ ]
-        
+
+# Saves the high scores to a file.       
 func _save_high_scores() -> void:
     var file: File = File.new()
     var mode_flags = File.WRITE_READ
@@ -81,17 +92,24 @@ func _save_high_scores() -> void:
     file.open(HIGH_SCORES_FILE, mode_flags)
     file.store_var(_high_scores)  
 
+# Start the game in easy difficulty (5 tiles/sec).
 func _on_EasyButton_pressed() -> void:
     emit_signal("start_game", 5)
 
+# Start the game in normal difficulty (10 tiles/sec).
 func _on_NormalButton_pressed():
     emit_signal("start_game", 10)
 
+# Start the game in hard difficulty (15 tiles/sec).
 func _on_HardButton_pressed():
     emit_signal("start_game", 15)
 
+# Submit a high score to be saved.
 func _on_SubmitButton_pressed():
-    var new_score = { "player": $MarginContainer/HighScoreInput/InputLineEdit.text, "score": game_over_score }
+    var new_score = {
+        "player": $MarginContainer/HighScoreInput/InputLineEdit.text,
+        "score": _game_over_score,
+    }
     var high_score_length: int = len(_high_scores)
     
     # Update and save high score.
@@ -106,6 +124,7 @@ func _on_SubmitButton_pressed():
         
     _save_high_scores()
     _show_default_ui()
-    
+
+# Skip submitting a high score and just show the start game screen.
 func _on_SkipButton_pressed():
     _show_default_ui()

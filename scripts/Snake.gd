@@ -4,53 +4,58 @@ class_name Snake
 signal ate_food
 signal game_over
 
-export(int) var tile_size_pixels = 16
-export(PackedScene) var Tail
-
-const movement_vectors = {
+const MOVEMENT_VECTORS = {
     0: Vector2.RIGHT,
     1: Vector2.LEFT,
     2: Vector2.UP,
-    3: Vector2.DOWN
+    3: Vector2.DOWN,
 }
+
+export(int) var tile_size_pixels = 16
+export(PackedScene) var Tail
 
 # We keep track of current and next direction to avoid being able to move
 # backwards by hitting buttons quickly in between movement ticks.
-var current_direction: int = -1
-var next_direction: int = -1
+var _current_direction: int = -1
+var _next_direction: int = -1
 
-var tail = []
-
-# Set movement direction based on unhandled input.
-func _unhandled_input(_event: InputEvent) -> void:
-    if Input.is_action_pressed("ui_right") and current_direction != 1:
-        next_direction = 0
-    elif Input.is_action_pressed("ui_left") and current_direction != 0:
-        next_direction = 1
-    elif Input.is_action_pressed("ui_up") and current_direction != 3:
-        next_direction = 2
-    elif Input.is_action_pressed("ui_down") and current_direction != 2:
-        next_direction = 3
+# List of tail nodes, each an instance of the Tail scene.
+var tail: Array = []
 
 func _physics_process(delta: float) -> void:
-    var weight: float = delta * _speed_tiles_per_sec
+    # Handle input to set future direction.
+    _set_next_direction()
     
     # If the next cell has been reached, set a new target for each node.
+    var weight: float = delta * _speed_tiles_per_sec
     var prev_tail: Area2D = null
-    if position == _target_position and next_direction != -1:
+    if position == _target_position and _next_direction != -1:
         _set_new_targets()
         
     move(delta)
-    
+
+# Move the head and all tail nodes toward the target position.
 func move(delta: float) -> void:
     .move(delta)
     for tail_node in tail:
         tail_node.move(delta)
 
+# Set next direction based on input.        
+func _set_next_direction() -> void:
+    if Input.is_action_pressed("ui_right") and _current_direction != 1:
+        _next_direction = 0
+    elif Input.is_action_pressed("ui_left") and _current_direction != 0:
+        _next_direction = 1
+    elif Input.is_action_pressed("ui_up") and _current_direction != 3:
+        _next_direction = 2
+    elif Input.is_action_pressed("ui_down") and _current_direction != 2:
+        _next_direction = 3
+        
+# Set new target positions for head and all tail nodes.
 func _set_new_targets() -> void:
     # Calculate next movement vector.
-    current_direction = next_direction
-    var move: Vector2 = movement_vectors[current_direction] * tile_size_pixels
+    _current_direction = _next_direction
+    var move: Vector2 = MOVEMENT_VECTORS[_current_direction] * tile_size_pixels
     
     # Check for a collision on the next move.
     $RayCast2D.cast_to = move * 4
@@ -73,11 +78,12 @@ func _set_new_targets() -> void:
             tail_node.set_target(prev_tail.position)
         prev_tail = tail_node
 
+# Eat food and create a new tail node.
 func _eat_food(food_position: Vector2) -> void:
     # Create a tail node at the current location of the head and add it to
     # the scene.
     var tail_node: SnakePart = Tail.instance()
-    tail_node.init(position, position, _speed_tiles_per_sec)
+    tail_node.init(position, _speed_tiles_per_sec)
     tail.push_front(tail_node)
     get_parent().add_child(tail_node)
     
@@ -87,7 +93,8 @@ func _eat_food(food_position: Vector2) -> void:
     
     # Send signal to create another food.
     emit_signal("ate_food")
-    
+
+# End the game.   
 func _game_over() -> void:
     # Signal game over.
     emit_signal("game_over")
