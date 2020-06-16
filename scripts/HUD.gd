@@ -90,26 +90,21 @@ func _save_high_scores() -> void:
         mode_flags = File.WRITE_READ
         
     file.open(HIGH_SCORES_FILE, mode_flags)
-    file.store_var(_high_scores)  
-
-# Start the game in easy difficulty (5 tiles/sec).
-func _on_EasyButton_pressed() -> void:
-    emit_signal("start_game", 5)
-
-# Start the game in normal difficulty (10 tiles/sec).
-func _on_NormalButton_pressed():
-    emit_signal("start_game", 10)
-
-# Start the game in hard difficulty (15 tiles/sec).
-func _on_HardButton_pressed():
-    emit_signal("start_game", 15)
-
+    file.store_var(_high_scores)
+    
 # Submit a high score to be saved.
-func _on_SubmitButton_pressed():
+func _submit_high_score() -> void:
+    _clear_error()
+    
     var new_score = {
-        "player": $MarginContainer/HighScoreInput/InputLineEdit.text,
+        "player": $MarginContainer/HighScoreInput/InputLineEdit.text.to_upper(),
         "score": _game_over_score,
     }
+    
+    if new_score.player == "":
+        _show_error("Please enter a non-empty name with up to 3 letters.")
+        return
+    
     var high_score_length: int = len(_high_scores)
     
     # Update and save high score.
@@ -125,6 +120,25 @@ func _on_SubmitButton_pressed():
     _save_high_scores()
     _show_default_ui()
 
+# Start the game in easy difficulty (5 tiles/sec).
+func _on_EasyButton_pressed() -> void:
+    emit_signal("start_game", 5)
+
+# Start the game in normal difficulty (10 tiles/sec).
+func _on_NormalButton_pressed():
+    emit_signal("start_game", 10)
+
+# Start the game in hard difficulty (15 tiles/sec).
+func _on_HardButton_pressed():
+    emit_signal("start_game", 15)
+
 # Skip submitting a high score and just show the start game screen.
 func _on_SkipButton_pressed():
+    _clear_error()
     _show_default_ui()
+    
+func _show_error(error_message: String) -> void:
+    $MarginContainer/HighScoreInput/ErrorMessage.text = error_message
+    
+func _clear_error() -> void:
+    $MarginContainer/HighScoreInput/ErrorMessage.text = ""

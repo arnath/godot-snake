@@ -1,14 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://fonts/ARCADE.TTF" type="DynamicFontData" id=1]
+[ext_resource path="res://fonts/arcade_64.tres" type="DynamicFont" id=1]
 [ext_resource path="res://fonts/arcade_32.tres" type="DynamicFont" id=2]
 [ext_resource path="res://fonts/arcade_128.tres" type="DynamicFont" id=3]
 [ext_resource path="res://scripts/HUD.gd" type="Script" id=4]
 [ext_resource path="res://scenes/HighScoreListItem.tscn" type="PackedScene" id=5]
-
-[sub_resource type="DynamicFont" id=1]
-size = 64
-font_data = ExtResource( 1 )
 
 [node name="HUD" type="Panel"]
 anchor_right = 1.0
@@ -85,7 +81,7 @@ text = "Hard"
 anchor_right = 1.0
 margin_top = 192.0
 grow_horizontal = 2
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = ExtResource( 1 )
 text = "High Scores"
 align = 1
 __meta__ = {
@@ -144,6 +140,9 @@ custom_fonts/font = ExtResource( 2 )
 align = 1
 caret_blink = true
 caret_blink_speed = 0.5
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="HighScoreButtonsContainer" type="HBoxContainer" parent="MarginContainer/HighScoreInput"]
 anchor_right = 1.0
@@ -171,8 +170,19 @@ grow_horizontal = 2
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 2 )
 text = "Skip"
+
+[node name="ErrorMessage" type="Label" parent="MarginContainer/HighScoreInput"]
+anchor_right = 1.0
+margin_top = 200.0
+custom_fonts/font = ExtResource( 2 )
+align = 1
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="pressed" from="MarginContainer/DefaultInterface/HBoxContainer/EasyButton" to="." method="_on_EasyButton_pressed"]
 [connection signal="pressed" from="MarginContainer/DefaultInterface/HBoxContainer/NormalButton" to="." method="_on_NormalButton_pressed"]
 [connection signal="pressed" from="MarginContainer/DefaultInterface/HBoxContainer/HardButton" to="." method="_on_HardButton_pressed"]
-[connection signal="pressed" from="MarginContainer/HighScoreInput/HighScoreButtonsContainer/SubmitButton" to="." method="_on_SubmitButton_pressed"]
+[connection signal="text_entered" from="MarginContainer/HighScoreInput/InputLineEdit" to="." method="_submit_high_score"]
+[connection signal="pressed" from="MarginContainer/HighScoreInput/HighScoreButtonsContainer/SubmitButton" to="." method="_submit_high_score"]
 [connection signal="pressed" from="MarginContainer/HighScoreInput/HighScoreButtonsContainer/SkipButton" to="." method="_on_SkipButton_pressed"]
